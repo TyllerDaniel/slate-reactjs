@@ -11,3 +11,32 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.App {
+  color: rgb(17,17,17);
+  max-width: 740px;
+  background-color: rgb(255, 255, 255);
+  box-shadow: rgba(118, 143, 255, 0.1);
+  padding: 40px;
+  margin: 65px auto 45px;
+  border-radius: 4.5px;
+
+
+}
+
+.format-toolbar {
+  display: flex;
+  border-bottom: solid 2.7px rgba(199, 198, 255, 0.15);
+  padding: 10px 0px;
+  margin: 0 0 10px 0;
+}
+
+.tooltip-icon-button {
+  background-color: #D3D3D3;
+  color: black;
+  padding: 10px 20px;
+  text-align: center;
+  display: inline-block;
+  font-size: 12px;
+}
+
