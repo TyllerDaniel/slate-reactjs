@@ -1,6 +1,6 @@
-import React,{useCallback, useState,Fragment,Component } from "react";
-import { createEditor, Transforms,Editor, Text } from 'slate';
-import { Slate, Editable, withReact } from 'slate-react'
+import React,{useCallback, useState,Fragment} from "react";
+import { createEditor, Transforms,Editor, Text,Element } from 'slate';
+import { Slate, Editable, withReact} from 'slate-react'
 import Icon from "react-icons-kit";
 import { bold } from "react-icons-kit/feather/bold";
 import { italic } from "react-icons-kit/feather/italic";
@@ -13,7 +13,11 @@ import {alignRight} from 'react-icons-kit/feather/alignRight'
 import {quoteSerifLeft} from 'react-icons-kit/iconic/quoteSerifLeft'
 import {link} from 'react-icons-kit/feather/link'
 import {camera} from 'react-icons-kit/feather/camera'
+import {minus} from 'react-icons-kit/feather/minus'
 import FormatToolbar from "./FormatToolbar";
+
+const LIST_TYPES = ['numbered-list', 'bulleted-list']
+const TEXT_ALIGN_TYPES = ['left', 'center', 'right', 'justify']
 
 const MainFontsApp = () => {
   
@@ -23,6 +27,9 @@ const MainFontsApp = () => {
     switch (props.element.type) {
         case 'code':
             return <CodeElement {...props} />
+        case 'quote':
+            return <blockQuote {...props} />
+
         default :
             return <DefaultElement {...props} />
     }
@@ -53,20 +60,29 @@ const MainFontsApp = () => {
             <Icon icon={list} />
         </button>
         <button
-            onPointerDown={(e) => CustomEditor.toggleTitle(editor)} 
+            onPointerDown={(e) => CustomEditor.toggleStrikethrough(editor)} 
+            className="tooltip-icon-button">
+            <Icon icon={minus} />
+        </button>
+        <button
+            onPointerDown={(e) => CustomEditor.toggleUnderline(editor)} 
             className="tooltip-icon-button">
             <Icon icon={underline} />
         </button>
         <button className="tooltip-icon-button">
             <Icon icon={alignLeft} />
         </button>
-        <button className="tooltip-icon-button">
+        <button 
+          onPointerDown={(e) => CustomEditor.toggleAlignCenter(editor)} 
+          className="tooltip-icon-button">
             <Icon icon={alignCenter} />
         </button>
         <button className="tooltip-icon-button">
             <Icon icon={alignRight} />
         </button>
-        <button className="tooltip-icon-button">
+        <button 
+            onPointerDown={(e) => CustomEditor.toggleBlockQuote(editor)}
+            className="tooltip-icon-button">
             <Icon icon={quoteSerifLeft} />
         </button>
         <button className="tooltip-icon-button">
@@ -101,9 +117,14 @@ const MainFontsApp = () => {
                         CustomEditor.toggleItalicMark(editor)
                     break
                     }
+                    case 'c': {
+                        event.preventDefault()
+                        CustomEditor.toggleStrikethrough(editor)
+                    break
+                    }
                     case 'u': {
                         event.preventDefault()
-                        CustomEditor.toggleTitle(editor)
+                        CustomEditor.toggleUnderline(editor)
                     break
                     }
                 }
@@ -120,6 +141,11 @@ const initialValue = [
     type: 'paragraph',
     children: [{ text: 'A line of text in a paragraph.' }],
   },
+  {
+    type: 'link',
+    url : 'https://www.google.com/',
+    children: [{text: 'hyperlink'}],
+  }
 ]
 
 const CodeElement = props => {
@@ -134,16 +160,34 @@ const DefaultElement = props => {
   return <p {...props.attributes}>{props.children}</p>
 }
 
-const Leaf = props => {
-  return (
-    <span
-      {...props.attributes}
-      style={{ fontWeight: props.leaf.bold ? 'bold' : 'normal' }}
-    >
-      {props.children}
-    </span>
-  )
-}
+
+const Leaf = ({ leaf, children, attributes }) => {
+  if (leaf.bold) {
+    children = <strong>{children}</strong>;
+  }
+
+  if (leaf.code) {
+    children = <code>{children}</code>;
+  }
+
+  if (leaf.italic) {
+    children = <em>{children}</em>;
+  }
+
+  if (leaf.underline) {
+    children = <u>{children}</u>;
+  }
+
+  if (leaf.strikethrough) {
+    children = <del>{children}</del>;
+  }
+    if (leaf.blockquote) {
+    children = <blockquote>{children}</blockquote>;
+  }
+
+  return <span {...attributes}>{children}</span>;
+};
+
 const CustomEditor = {
   isBoldMarkActive(editor) {
     const [match] = Editor.nodes(editor, {
@@ -165,13 +209,6 @@ const CustomEditor = {
     const [match] = Editor.nodes(editor, {
       match: n => n.italic === true,
       universal: true,
-    })
-
-    return !!match
-  },
-  isTitleActive(editor) {
-    const [match] = Editor.nodes(editor, {
-      match: n => n.type === 'title',
     })
 
     return !!match
@@ -201,14 +238,31 @@ const CustomEditor = {
       { match: n => Editor.isBlock(editor, n) }
     )
   },
-  toggleTitle(editor) {
-    const isActive = CustomEditor.isTitleActive(editor)
+  toggleStrikethrough(editor) {
+    const [match] = Editor.nodes(editor, {
+      match: n => n.strikethrough === true,
+      universal: true
+    });
     Transforms.setNodes(
       editor,
-      { type: isActive ? null : 'title' },
-      { match: n => Editor.isBlock(editor, n) }
-    )
+      { strikethrough: !!match ? null : true },
+      { match: n => Text.isText(n), split: true }
+    );
   },
+    toggleUnderline(editor) {
+    const [match] = Editor.nodes(editor, {
+      match: n => n.underline === true,
+      universal: true
+    });
+    Transforms.setNodes(
+      editor,
+      { underline: !!match ? null : true },
+      { match: n => Text.isText(n), split: true }
+    );
+  }
   
 }
+
+
+
 export default MainFontsApp;
