@@ -16,6 +16,8 @@ import {camera} from 'react-icons-kit/feather/camera'
 import {minus} from 'react-icons-kit/feather/minus'
 import FormatToolbar from "./FormatToolbar";
 
+const LIST_TYPES = ['numbered-list', 'bulleted-list']
+const TEXT_ALIGN_TYPES = ['left', 'center', 'right', 'justify']
 
 const MainFontsApp = () => {
   
@@ -25,6 +27,8 @@ const MainFontsApp = () => {
     switch (props.element.type) {
         case 'code':
             return <CodeElement {...props} />
+        case 'quote':
+            return <blockQuote {...props} />
 
         default :
             return <DefaultElement {...props} />
@@ -84,9 +88,7 @@ const MainFontsApp = () => {
         <button className="tooltip-icon-button">
             <Icon icon={link} />
         </button>
-        <button 
-            onPointerDown={(e) => CustomEditor.toggleImage(editor)}
-            className="tooltip-icon-button">
+        <button className="tooltip-icon-button">
             <Icon icon={camera} />
         </button>
     </FormatToolbar>
@@ -153,8 +155,6 @@ const CodeElement = props => {
     </pre>
   )
 }
-
-
 
 const DefaultElement = props => {
   return <p {...props.attributes}>{props.children}</p>
@@ -259,8 +259,7 @@ const CustomEditor = {
         { underline: !!match ? null : true },
         { match: n => Text.isText(n), split: true }
       );
-    },
-
+    }
   
 }
 
